@@ -41,10 +41,22 @@ var makeCanvasGraphics = function (robot, canvas) {
             return;
         }
         
-        context.strokeStyle = context.fillStyle = "black";
-        context.lineWidth = 2;
+        var context = that.context,
+            trajs = that.trajs;
+        
         
         for (var i = 0; i < trajs.length; i++) {
+            if (trajs[i].isCurrent) {
+                context.strokeStyle = context.fillStyle = "red";
+                context.lineWidth = 3;
+            } else if (trajs[i].v < 0) {
+                context.strokeStyle = context.fillStyle = "blue";
+                context.lineWidth = 1.5;
+            } else {
+                context.strokeStyle = context.fillStyle = "black";
+                context.lineWidth = 1;
+            }
+                
             switch (trajs[i].type) {
                 case "line":
                 context.beginPath();

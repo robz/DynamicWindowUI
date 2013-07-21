@@ -73,22 +73,22 @@ var Graph = (function () {
         
         for (x = canvas.width/2.0; x <= canvas.width; x += inc.x) {
             context.moveTo(x, canvas.height/2.0);
-            context.lineTo(x, canvas.height/2.0 - 10);
+            context.lineTo(x, canvas.height/2.0 - 3);
         }
         
         for (x = canvas.width/2.0; x >= 0; x -= inc.x) {
             context.moveTo(x, canvas.height/2.0);
-            context.lineTo(x, canvas.height/2.0 - 10);
+            context.lineTo(x, canvas.height/2.0 - 3);
         }
         
         for (y = canvas.height/2.0; y <= canvas.height; y += inc.y) {
             context.moveTo(canvas.width/2.0, y);
-            context.lineTo(canvas.width/2.0 + 10, y);
+            context.lineTo(canvas.width/2.0 + 3, y);
         }
         
         for (y = canvas.height/2.0; y >= 0; y -= inc.y) {
             context.moveTo(canvas.width/2.0, y);
-            context.lineTo(canvas.width/2.0 + 10, y);
+            context.lineTo(canvas.width/2.0 + 3, y);
         }
         
         context.stroke();

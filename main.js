@@ -1,18 +1,5 @@
 (function () {
-    var DT = .1,
-        V_MAX = .05,
-        V_INC = V_MAX/5.0,
-        DV_MAX = V_MAX/2.0,
-        V_NUM_INCS = 9,
-        V_SIZE = DT*2*DV_MAX,
-        
-        W_MAX = .002,
-        W_INC = W_MAX/5.0,
-        DW_MAX = W_MAX/2.0,
-        W_NUM_INCS = 9,
-        W_SIZE = DT*2*DW_MAX,
-        
-        KEY_W = "W".charCodeAt(0),
+    var KEY_W = "W".charCodeAt(0),
         KEY_A = "A".charCodeAt(0),
         KEY_S = "S".charCodeAt(0),
         KEY_D = "D".charCodeAt(0),
@@ -53,26 +40,9 @@
     setInterval(function () {
         movingRobot.pose.step(1000*DT/2);
         robotGraphics.animate();
-        
-        Graph.clearCanvas();
 
-        for (vi = 0; vi < V_NUM_INCS; vi++) {
-            var v = movingRobot.pose.v + (vi - Math.floor(V_NUM_INCS/2))*V_SIZE/V_NUM_INCS;
-            
-            if (v > V_MAX || v < -V_MAX) {
-                continue;
-            }
-                 
-            for (wi = 0; wi < W_NUM_INCS; wi++) {
-                var w = movingRobot.pose.w + (wi - Math.floor(W_NUM_INCS/2))*W_SIZE/W_NUM_INCS;
-            
-                if (w > W_MAX || w < -W_MAX) {
-                    continue
-                }
-                    
-                Graph.plotPoint(w, v);
-            }
-        }
+        calculateTrajectories(movingRobot.pose, trajRobot.pose, Graph, trajGraphics);
+        trajGraphics.animate();
     }, 1000*DT/2);
         
     document.onkeydown = function (event) {
