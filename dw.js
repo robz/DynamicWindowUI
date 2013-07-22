@@ -1,7 +1,7 @@
-var calculateTrajectories = function (pose, trajPose, graph, graphics) {
+var calculateAndPlotTrajectories = function (pose, trajPose, plot) {
     var trajectories = [];
     
-    Graph.clearCanvas();
+    plot && plot.clearCanvas();
 
     for (vi = 0; vi < V_NUM_INCS; vi++) {
         var v = pose.v + (vi - Math.floor(V_NUM_INCS/2))*V_SIZE/V_NUM_INCS;
@@ -16,8 +16,8 @@ var calculateTrajectories = function (pose, trajPose, graph, graphics) {
             if (w > W_MAX || w < -W_MAX) {
                 continue;
             }
-                
-            graph.plotPoint(w, v);
+            
+            plot && plot.plotPoint(w, v);
             
             if (Math.abs(w) < 1.0e-6 && Math.abs(v) < 1.0e-6) {
                 var trajectory = {
@@ -57,5 +57,5 @@ var calculateTrajectories = function (pose, trajPose, graph, graphics) {
         }
     }
             
-    graphics.trajs = trajectories;
+    return trajectories;
 };

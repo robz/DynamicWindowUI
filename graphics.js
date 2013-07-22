@@ -1,23 +1,19 @@
-var makeCanvasGraphics = function (robot, canvas) {
-    var that = {};
+var makeCanvasGraphics = function (canvas) {
+    var that = {},
+        context = canvas.getContext("2d"),
+        bgBuffer;
     
-    that.context = canvas.getContext("2d");
-    
-    var bgBuffer = that.context.getImageData(0, 0, canvas.width, canvas.height);
-    
-    var clearCanvas = function () {
-        if (!canvas) {
-            return false;
-        }
-        
-        that.context.putImageData(bgBuffer, 0, 0);
-        
-        return true;
+    that.setBackground = function () {
+        bgBuffer = context.getImageData(0, 0, canvas.width, canvas.height);
     };
     
-    var drawRobot = function () {
-        var context = that.context;
-        
+    that.clearCanvas = function () {
+        context.putImageData(bgBuffer, 0, 0);
+    };
+    
+    that.drawRobot = function (robot) {
+        context.save();
+    
         context.strokeStyle = "darkGray";
         context.fillStyle = robot.color;
         context.lineWidth = 2;
@@ -33,17 +29,11 @@ var makeCanvasGraphics = function (robot, canvas) {
                        robot.pose.y + robot.radius * Math.sin(robot.pose.heading));
         context.stroke();
         
-        return true;
+        context.restore();
     };
     
-    var drawTrajectories = function () {
-        if (!that.trajs) {
-            return;
-        }
-        
-        var context = that.context,
-            trajs = that.trajs;
-        
+    that.drawTrajectories = function (trajs) {
+        context.save();
         
         for (var i = 0; i < trajs.length; i++) {
             if (trajs[i].isCurrent) {
@@ -58,34 +48,28 @@ var makeCanvasGraphics = function (robot, canvas) {
             }
                 
             switch (trajs[i].type) {
-                case "line":
+            case "line":
                 context.beginPath();
                 context.moveTo(trajs[i].x, trajs[i].y);
                 context.lineTo(trajs[i].x + 1e6*Math.cos(trajs[i].theta), 
                                trajs[i].y + 1e6*Math.sin(trajs[i].theta));
                 context.stroke();
                 break;
-                case "arc":
+            case "arc":
                 context.beginPath();
                 context.arc(trajs[i].x, trajs[i].y, trajs[i].radius, 0, 2*Math.PI, false);
                 context.stroke();
                 break;
-                case "point":
+            case "point":
                 context.beginPath();
                 context.arc(trajs[i].x, trajs[i].y, 5, 0, 2*Math.PI, false);
                 context.fill();
                 break;
             }
         }
-    }
-    
-    that.animate = function (dt) {
-        clearCanvas();
-        drawRobot();
-        drawTrajectories();
         
-        return true;
-    };
+        context.restore();
+    }
     
     return that;
 };
