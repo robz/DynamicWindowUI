@@ -82,13 +82,13 @@
                 pose.v += V_INC;
                 break;
             case KEY_A:
-                pose.w -= W_INC;
+                pose.w += W_INC;
                 break;
             case KEY_S:
                 pose.v -= V_INC;
                 break;
             case KEY_D:
-                pose.w += W_INC;
+                pose.w -= W_INC;
                 break;
             case KEY_SPACE:
                 pose.v = pose.w = 0;
