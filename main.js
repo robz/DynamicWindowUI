@@ -19,9 +19,9 @@
         localRobot = createRobot({
             x: 0.0,
             y: 0.0,
-            heading: worldRobot.pose.heading,
-            v: worldRobot.pose.v,
-            w: worldRobot.pose.w,
+            heading: 0.0,
+            v: 0.0,
+            w: 0.0,
             radius: worldRobot.radius,
             color: worldRobot.color,
             name: "local"
@@ -49,9 +49,12 @@
             V_MAX*2, 
             W_MAX, 
             V_MAX
-            ));
+            )),
+            
+        goal = createPoint({x:25.0, y:25.0});
 
     // set all the canvas' backgrounds
+    worldGraphics.plotPoint(goal.x, goal.y, 1.0);
     worldGraphics.setBuffer();
     localGraphics.drawRobot(localRobot);
     localGraphics.setBuffer();
@@ -60,14 +63,38 @@
 
     setInterval(function () {
         // move our robot forward in time
-        worldRobot.step(1000*DT);
+        worldRobot.step(DT);
 
-        // cacluate the trajectories in the local reference frame
-        var trajectories = calculateTrajectories(
+        // cacluate the available trajectories in the local reference frame
+        var trajectories = calculateDWTrajectories(
             worldRobot.pose,
             localRobot.pose
             );
-
+           
+        // move the goal & obstacle points into the local reference frame
+        var localGoal = goal.transform(
+            worldRobot.x,
+            worldRobot.y,
+            worldRobot.heading
+            );
+            
+        localRobot.pose.v = worldRobot.pose.v;
+        localRobot.pose.w = worldRobot.pose.w;
+        
+        // make a decision based on current pose, goal, available trajectories,
+        //  and detected obstacle points
+        var decision = createDWDecision(
+            localRobot.pose, 
+            localGoal, 
+            trajectories, 
+            [],
+            DT*100
+            );
+        
+        // set the new pose to reflect the decision
+        worldRobot.pose.v = decision.v;
+        worldRobot.pose.w = decision.w;
+        
         // plot the trajectory (w,v) pairs as points on the graph
         dwGraphics.restoreBuffer();
         for (var i = 0; i < trajectories.length; i++) {

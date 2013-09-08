@@ -1,10 +1,4 @@
-var createRobot = function (spec) {
-    var that = {
-        radius: spec.radius,
-        color: spec.color,
-        name: spec.name
-        };
-        
+var createPose = function (spec) {
     var pose = {
         x: spec.x,
         y: spec.y,
@@ -12,10 +6,8 @@ var createRobot = function (spec) {
         v: spec.v,
         w: spec.w
         };
-        
-    that.pose = pose;
     
-    that.step = function (dt) {
+    pose.step = function (dt) {
         var new_x, new_y, new_heading;
 
         if (Math.abs(pose.w) < 1.0e-6) {
@@ -26,8 +18,10 @@ var createRobot = function (spec) {
             var wd = dt * pose.w,
                 R = pose.v / pose.w;
 
-            new_x = pose.x + R * Math.sin(wd + pose.heading) - R * Math.sin(pose.heading);
-            new_y = pose.y - R * Math.cos(wd + pose.heading) + R * Math.cos(pose.heading);   
+            new_x = pose.x + R * Math.sin(wd + pose.heading) 
+                           - R * Math.sin(pose.heading);
+            new_y = pose.y - R * Math.cos(wd + pose.heading) 
+                           + R * Math.cos(pose.heading);   
             new_heading = pose.heading + wd;
             new_heading = (new_heading + Math.PI*2)%(Math.PI*2)
         }
@@ -35,6 +29,26 @@ var createRobot = function (spec) {
         pose.x = new_x;
         pose.y = new_y;
         pose.heading = new_heading;
+    };
+    
+    pose.copy = function () {
+        var newPose = createPose(pose);
+        return createPose(pose);
+    };
+    
+    return pose;
+};
+
+var createRobot = function (spec) {
+    var that = {
+        radius: spec.radius,
+        color: spec.color,
+        name: spec.name,
+        pose: createPose(spec)
+        };
+    
+    that.step = function (dt) {
+        that.pose.step(dt);
     };
 
     return that;

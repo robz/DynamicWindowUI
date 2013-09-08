@@ -37,7 +37,7 @@ var createTrajectory = function (v, w, refPose) {
     return that;
 };
 
-var calculateTrajectories = function (pose, refPose) {
+var calculateDWTrajectories = function (pose, refPose) {
     var trajectories = [];
 
     for (vi = 0; vi < V_NUM_INCS; vi++) {
@@ -65,4 +65,55 @@ var calculateTrajectories = function (pose, refPose) {
     }
             
     return trajectories;
+};
+
+var createDWDecision = function (pose, goal, trajectories, obstacles, dt) {
+    var decision = { v: null, w: null };
+
+    var calcHeadingValue = function (traj) {
+            // follow this trajectory for dt seconds
+            var newPose = pose.copy();
+            newPose.v = traj.v;
+            newPose.w = traj.w;
+            newPose.step(dt);
+
+            // calculate the new direction to the goal
+            var dirToGoal = Math.atan2(goal.y - newPose.y, goal.x - newPose.x);
+
+            // find the diff between the new goal direction and the new heading
+            var diff = ((dirToGoal - newPose.heading) + Math.PI) % (2*Math.PI) - Math.PI;
+
+            // normalize (diff can't be larger than PI) and invert (higher 
+            //  values are better)
+            return 1.0 - Math.abs(diff) / Math.PI;
+        },
+
+        calcSpeedValue = function (traj) {
+            // transform [-V_MAX, V_MAX] range to [0, 1] range
+            return traj.v / (2.0 * V_MAX) + 0.5;
+        },
+
+        calcClearanceValue = function (traj) {
+            return 0.0;
+        };
+
+    var i, traj, value, maxValue = -1;
+
+    // loop through trajectories
+    for (i = 0; i < trajectories.length; i++) {
+        traj = trajectories[i];
+
+        // calculate trajectory value
+        value = calcHeadingValue(traj) * HEADING_WEIGHT +
+                calcSpeedValue(traj) * SPEED_WEIGHT + 
+                calcClearanceValue(traj) * CLEARANCE_WEIGHT;
+        
+        if (value > maxValue) {
+            maxValue = value;
+            decision.v = traj.v;
+            decision.w = traj.w;
+        }
+    }
+
+    return decision;
 };
