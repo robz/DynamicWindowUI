@@ -35,6 +35,7 @@
         dwGraphics = makeGraphics(makePlot(
             document.getElementById("plotCanvas"), W_MAX*2, V_MAX*2, W_MAX, V_MAX));
     
+    // set all the canvas' backgrounds
     worldGraphics.setBuffer();
     localGraphics.drawRobot(localRobot);
     localGraphics.setBuffer();
@@ -42,35 +43,43 @@
     dwGraphics.setBuffer();
     
     setInterval(function () {
-        worldRobot.pose.step(1000*DT);
+        worldRobot.step(1000*DT);
 
-        // cacluate the trajectories in order to draw all of them on the local 
-        //  canvas
-        var trajectories = calculateAndPlotTrajectories(
+        // cacluate the trajectories in the local reference frame
+        var trajectories = calculateTrajectories(
             worldRobot.pose,
-            localRobot.pose, 
-            dwGraphics
+            localRobot.pose
             );
         
+        // plot the trajectory (w,v) pairs as points on the graph
+        dwGraphics.restoreBuffer();
+        for (var i = 0; i < trajectories.length; i++) {
+            dwGraphics.plotPoint(
+                trajectories[i].w,
+                trajectories[i].v,
+                V_INC/3 // kinda arbitrary
+                );
+        }
+        
+        // draw the trajectories on the local canvas
         localGraphics.restoreBuffer();
         localGraphics.drawTrajectories(trajectories);
         
-        // cacluate the trajectories in order to place the current one in the 
-        //  world canvas
-        var trajectories = calculateAndPlotTrajectories(
+        // cacluate the trajectories again in the global reference frame
+        var trajectories = calculateTrajectories(
             worldRobot.pose,
-            worldRobot.pose, 
-            null
+            worldRobot.pose
             );
         
+        // draw the current trajectory on the global canvas
         worldGraphics.restoreBuffer();
-        
         for (var i = 0; i < trajectories.length; i++) {
             if (trajectories[i].isCurrent) {
                 worldGraphics.drawTrajectories([trajectories[i]]);
             }
         }
         
+        // finally, draw the current robot on the world canvas
         worldGraphics.drawRobot(worldRobot);
     }, 1000*DT);
     

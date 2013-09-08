@@ -1,13 +1,21 @@
 var createRobot = function (spec) {
+    var that = {
+        radius: spec.radius,
+        color: spec.color,
+        name: spec.name
+        };
+        
     var pose = {
-            x: spec.x,
-            y: spec.y,
-            heading: spec.heading,
-            v: spec.v,
-            w: spec.w
-            };
+        x: spec.x,
+        y: spec.y,
+        heading: spec.heading,
+        v: spec.v,
+        w: spec.w
+        };
+        
+    that.pose = pose;
     
-    pose.step = function (dt) {
+    that.step = function (dt) {
         var new_x, new_y, new_heading;
 
         if (Math.abs(pose.w) < 1.0e-6) {
@@ -29,10 +37,5 @@ var createRobot = function (spec) {
         pose.heading = new_heading;
     };
 
-    return {
-        pose: pose,
-        radius: spec.radius,
-        color: spec.color,
-        name: spec.name
-        };
+    return that;
 };
