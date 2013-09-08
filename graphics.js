@@ -1,4 +1,4 @@
-var makeGraphics = function (plot) {
+var createGraphics = function (plot) {
     var that = {};
     
     var drawLine = function (x0, y0, x1, y1) {

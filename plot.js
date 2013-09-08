@@ -1,5 +1,5 @@
-// parameters are all in plot scale
-var makePlot = function (canvas, sizex, sizey, originx, originy) {
+// parameters are all in plot (not canvas) scale
+var createPlot = function (canvas, sizex, sizey, originx, originy) {
     var that = {},
         context = canvas.getContext("2d"),
         
