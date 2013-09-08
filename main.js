@@ -5,65 +5,75 @@
         KEY_D = "D".charCodeAt(0),
         KEY_SPACE = " ".charCodeAt(0),
         
-        worldCanvas = document.getElementById("worldCanvas"),
-        localCanvas = document.getElementById("localCanvas"),
-        
-        worldRobot = createRobot(
-            worldCanvas.width/2.0,
-            worldCanvas.height/2.0,
-            0.0,
-            0.0,
-            0.0,
-            20.0,
-            "green"
-            ),
+        worldRobot = createRobot({
+            x: 0.0,
+            y: 0.0,
+            heading: 0.0,
+            v: 0.0,
+            w: 0.0,
+            radius: 5.0,
+            color: "green",
+            name: "world"
+            }),
             
-        localRobot = createRobot(
-            localCanvas.width/2.0,
-            localCanvas.height/2.0,
-            worldRobot.pose.heading,
-            worldRobot.pose.v,
-            worldRobot.pose.w,
-            worldRobot.radius,
-            worldRobot.color
-            ),
+        localRobot = createRobot({
+            x: 0.0,
+            y: 0.0,
+            heading: worldRobot.pose.heading,
+            v: worldRobot.pose.v,
+            w: worldRobot.pose.w,
+            radius: worldRobot.radius,
+            color: worldRobot.color,
+            name: "local"
+            }),
             
-        worldGraphics = makeCanvasGraphics(worldCanvas),
-        localGraphics = makeCanvasGraphics(localCanvas),
-        
-        plot = makePlot(document.getElementById("plotCanvas"), W_MAX*2, V_MAX*2, W_INC, V_INC);
+        worldGraphics = makeGraphics(makePlot(
+            document.getElementById("worldCanvas"), 100.0, 100.0, 50.0, 50.0)),
+        localGraphics = makeGraphics(makePlot(
+            document.getElementById("localCanvas"), 100.0, 100.0, 50.0, 50.0)
+            ),
+        dwGraphics = makeGraphics(makePlot(
+            document.getElementById("plotCanvas"), W_MAX*2, V_MAX*2, W_MAX, V_MAX));
     
-    worldGraphics.setBackground();
+    worldGraphics.setBuffer();
     localGraphics.drawRobot(localRobot);
-    localGraphics.setBackground();
+    localGraphics.setBuffer();
+    dwGraphics.drawAxis(W_INC, V_INC, W_INC, V_INC);
+    dwGraphics.setBuffer();
     
     setInterval(function () {
-        worldRobot.pose.step(1000*DT/2);
+        worldRobot.pose.step(1000*DT);
 
+        // cacluate the trajectories in order to draw all of them on the local 
+        //  canvas
         var trajectories = calculateAndPlotTrajectories(
             worldRobot.pose,
             localRobot.pose, 
-            plot
+            dwGraphics
             );
         
-        localGraphics.clearCanvas();
+        localGraphics.restoreBuffer();
         localGraphics.drawTrajectories(trajectories);
         
+        // cacluate the trajectories in order to place the current one in the 
+        //  world canvas
         var trajectories = calculateAndPlotTrajectories(
             worldRobot.pose,
             worldRobot.pose, 
             null
             );
         
-        worldGraphics.clearCanvas();
+        worldGraphics.restoreBuffer();
+        
         for (var i = 0; i < trajectories.length; i++) {
             if (trajectories[i].isCurrent) {
                 worldGraphics.drawTrajectories([trajectories[i]]);
             }
         }
-        worldGraphics.drawRobot(worldRobot);
-    }, 1000*DT/2);
         
+        worldGraphics.drawRobot(worldRobot);
+    }, 1000*DT);
+    
     document.onkeydown = function (event) {
         var pose = worldRobot.pose;
     

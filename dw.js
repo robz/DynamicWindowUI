@@ -1,23 +1,23 @@
 var calculateAndPlotTrajectories = function (pose, trajPose, plot) {
     var trajectories = [];
     
-    plot && plot.clearCanvas();
+    plot && plot.restoreBuffer();
 
     for (vi = 0; vi < V_NUM_INCS; vi++) {
-        var v = pose.v + (vi - Math.floor(V_NUM_INCS/2))*V_SIZE/V_NUM_INCS;
+        var v = pose.v + (vi - Math.floor(V_NUM_INCS/2))*V_INC;
         
         if (v > V_MAX || v < -V_MAX) {
             continue;
         }
-             
+        
         for (wi = 0; wi < W_NUM_INCS; wi++) {
-            var w = pose.w + (wi - Math.floor(W_NUM_INCS/2))*W_SIZE/W_NUM_INCS;
+            var w = pose.w + (wi - Math.floor(W_NUM_INCS/2))*W_INC;
         
             if (w > W_MAX || w < -W_MAX) {
                 continue;
             }
             
-            plot && plot.plotPoint(w, v);
+            plot && plot.plotPoint(w, v, V_INC/3);
             
             if (Math.abs(w) < 1.0e-6 && Math.abs(v) < 1.0e-6) {
                 var trajectory = {

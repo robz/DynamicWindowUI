@@ -39,30 +39,9 @@ var makePlot = function (canvas, sizex, sizey, originx, originy) {
         context.lineTo(p.x, p.y);
     };
     
-    var drawEllipse = function (ctx, x, y, w, h) {
-        var kappa = .5522848, // 4*(sqrt(2)-1)/3
-        ox = (w / 2) * kappa, // control point offset horizontal
-        oy = (h / 2) * kappa, // control point offset vertical
-        xe = x + w,           // x-end
-        ye = y + h,           // y-end
-        xm = x + w / 2,       // x-middle
-        ym = y + h / 2;       // y-middle
-
-        context.moveTo(x, ym);
-        context.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
-        context.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
-        context.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
-        context.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
-    };
-    
-    // we're ignoring a, b, and flag because it's hard to draw a partial ellipse
-    // (we have to draw an ellipse because of possible scaling of the circle)
     that.arc = function (x, y, r, a, b, flag) {
-        var p = graphToCanvasCoords(x, y),
-            h = r*canvas.height/sizey,
-            w = r*canvas.width/sizex;
-        //drawEllipse(p.x - w/2, p.y - h/2, w, h);
-        context.arc(p.x, p.y, h, a, b, flag);
+        var p = graphToCanvasCoords(x, y);
+        context.arc(p.x, p.y, r*canvas.width/sizex, a, b, flag);
     };
     
     that.stroke = function () { 
@@ -77,7 +56,6 @@ var makePlot = function (canvas, sizex, sizey, originx, originy) {
     };
     
     that.beginPath = function () { context.beginPath(); };
-    that.closePath = function () { context.closePath(); };
     that.save = function () { context.save(); };
     that.restore = function () { context.restore(); };
     
@@ -85,19 +63,59 @@ var makePlot = function (canvas, sizex, sizey, originx, originy) {
     that.strokeStyle = context.strokeStyle;
     that.fillStyle = context.fillStyle;
     
-    // these two functions ruin the illusion that we're a real context.
-    //  they exist to make it more conveinent for a graphics object to 
-    //  manipulate the background on a canvas.
-    that.getBuffer = function () {
-        return context.getImageData(0, 0, canvas.width, canvas.height);
+    // extra methods
+    
+    that.plotPoint = function (x, y, r) {
+        context.fillStyle = "black";
+        context.beginPath();
+        that.arc(x, y, r, 0, Math.PI*2, false);
+        context.fill();
     };
     
-    that.putBuffer = function (buffer) {
+    var buffer;
+    
+    that.restoreBuffer = function () {
         context.putImageData(buffer, 0, 0);
     };
     
-    that.sizex = sizex;
-    that.sizey = sizey;
+    that.setBuffer = function () {
+        buffer = context.getImageData(0, 0, canvas.width, canvas.height);
+    };
+    
+    that.setBuffer();
+    
+    that.drawAxis = function (xinc, yinc, xTickHeight, yTickHeight) {
+        context.beginPath();
+        
+        that.moveTo(0, -sizey);
+        that.lineTo(0, sizey);
+        that.moveTo(-sizex, 0);
+        that.lineTo(sizex, 0);
+    
+        var x, y;
+    
+        for (x = 0; x <= sizex; x += xinc) {
+            that.moveTo(x, 0);
+            that.lineTo(x, yTickHeight);
+        }
+    
+        for (x = 0; x >= -sizex; x -= xinc) {
+            that.moveTo(x, 0);
+            that.lineTo(x, yTickHeight);
+        }
+    
+        for (y = 0; y <= sizey; y += yinc) {
+            that.moveTo(0, y);
+            that.lineTo(xTickHeight, y);
+        }
+    
+        for (y = 0; y >= -sizex; y -= yinc) {
+            that.moveTo(0, y);
+            that.lineTo(xTickHeight, y);
+        }
+    
+        context.stroke();
+    }
 
     return that;
 };
