@@ -94,8 +94,8 @@
             );
             
         // set the new pose to reflect the decision
-        //worldRobot.pose.v = decision.v;
-        //worldRobot.pose.w = decision.w;
+        worldRobot.pose.v = decision.v;
+        worldRobot.pose.w = decision.w;
         
         // plot the trajectory (w,v) pairs as points on the graph
         dwGraphics.restoreBuffer();
