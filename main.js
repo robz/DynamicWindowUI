@@ -26,9 +26,11 @@
             color: worldRobot.color,
             name: "local"
             }),
+            
+        worldCanvas = document.getElementById("worldCanvas"),
 
         worldGraphics = createGraphics(createPlot(
-            document.getElementById("worldCanvas"), 
+            worldCanvas, 
             100.0, 
             100.0, 
             50.0, 
@@ -51,14 +53,13 @@
             V_MAX
             )),
             
-        goal = createPoint({x:25.0, y:25.0});
+        goal = createPoint({x:25.0, y:1.0});
 
     // set all the canvas' backgrounds
-    worldGraphics.plotPoint(goal.x, goal.y, 1.0);
     worldGraphics.setBuffer();
     localGraphics.drawRobot(localRobot);
     localGraphics.setBuffer();
-    dwGraphics.drawAxis(W_INC, V_INC, W_INC, V_INC);
+    dwGraphics.drawAxis(W_INC, V_INC, W_INC/2.0, V_INC/2.0);
     dwGraphics.setBuffer();
 
     setInterval(function () {
@@ -70,30 +71,31 @@
             worldRobot.pose,
             localRobot.pose
             );
-           
+
         // move the goal & obstacle points into the local reference frame
         var localGoal = goal.transform(
-            worldRobot.x,
-            worldRobot.y,
-            worldRobot.heading
+            -worldRobot.pose.x,
+            -worldRobot.pose.y,
+            -worldRobot.pose.heading
             );
-            
+
+        // copy the current angular and linear velocity to our local pose
         localRobot.pose.v = worldRobot.pose.v;
         localRobot.pose.w = worldRobot.pose.w;
         
         // make a decision based on current pose, goal, available trajectories,
         //  and detected obstacle points
-        var decision = createDWDecision(
+        var decision = calcDWDecision(
             localRobot.pose, 
             localGoal, 
             trajectories, 
             [],
-            DT*100
+            DT*10
             );
-        
+            
         // set the new pose to reflect the decision
-        worldRobot.pose.v = decision.v;
-        worldRobot.pose.w = decision.w;
+        //worldRobot.pose.v = decision.v;
+        //worldRobot.pose.w = decision.w;
         
         // plot the trajectory (w,v) pairs as points on the graph
         dwGraphics.restoreBuffer();
@@ -124,6 +126,10 @@
 
         // finally, draw the current robot on the world canvas
         worldGraphics.drawRobot(worldRobot);
+        
+        // then draw the goal in the world and local frame
+        worldGraphics.plotPoint(goal.x, goal.y, 1.0);
+        localGraphics.plotPoint(localGoal.x, localGoal.y, 1.0);
     }, 1000*DT);
 
     // handle keyboard input that controls the angular and linear velocity of 
@@ -160,5 +166,22 @@
         } else if (pose.v < -V_MAX) {
             pose.v = -V_MAX;
         }
+    };
+    
+    worldCanvas.onmousedown = function (e) {
+        var mouseX, mouseY;
+
+        if (e.offsetX) {
+            mouseX = e.offsetX;
+            mouseY = e.offsetY;
+        } else if (e.layerX) {
+            mouseX = e.layerX;
+            mouseY = e.layerY;
+        }
+
+        var res = worldGraphics.canvasToGraphCoords(mouseX, mouseY);
+        
+        goal.x = res.x;
+        goal.y = res.y;
     };
 }());

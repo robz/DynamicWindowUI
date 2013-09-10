@@ -10,6 +10,8 @@ var createPoint = function (spec) {
     
     that.transform = function (dx, dy, dtheta) {
         var p = that.copy();
+        p.x = (that.x + dx) * Math.cos(dtheta) - (that.y + dy) * Math.sin(dtheta);
+        p.y = (that.x + dx) * Math.sin(dtheta) + (that.y + dy) * Math.cos(dtheta);
         return p;
     };
     

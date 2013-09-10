@@ -28,6 +28,9 @@ var createPlot = function (canvas, sizex, sizey, originx, originy) {
         
             return point;
         };
+        
+    that.graphToCanvasCoords = graphToCanvasCoords;
+    that.canvasToGraphCoords = canvasToGraphCoords;
     
     that.moveTo = function (x, y) {
         var p = graphToCanvasCoords(x, y);

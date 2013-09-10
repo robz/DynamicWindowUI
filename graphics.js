@@ -13,6 +13,9 @@ var createGraphics = function (plot) {
         plot.closePath();
     };
     
+    that.graphToCanvasCoords = plot.graphToCanvasCoords;
+    that.canvasToGraphCoords = plot.canvasToGraphCoords;
+    
     that.drawRobot = function (robot) {
         plot.save();
     

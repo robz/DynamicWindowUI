@@ -1,14 +1,14 @@
-var DT = 1/20,
+var DT = 100/1000,
 
     V_MAX = 10,
-    V_INC = V_MAX/50.0,
-    DV_MAX = V_MAX/2.0,
     V_NUM_INCS = 5,
+    DV_MAX = V_MAX,
+    V_INC = 2*DV_MAX*DT/V_NUM_INCS,
     
     W_MAX = Math.PI,
-    W_INC = W_MAX/50.0,
-    DW_MAX = W_MAX/2.0,
     W_NUM_INCS = 5,
+    DW_MAX = W_MAX,
+    W_INC = 2*DW_MAX*DT/W_NUM_INCS,
     
     HEADING_WEIGHT = 1.0,
     SPEED_WEIGHT = 1.0,
