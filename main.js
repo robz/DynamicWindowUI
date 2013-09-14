@@ -61,19 +61,62 @@
     localGraphics.setBuffer();
     dwGraphics.drawAxis(W_INC, V_INC, W_INC/2.0, V_INC/2.0);
     dwGraphics.setBuffer();
-
+    
+    var trajectories = [];
+    
+    var decision = {v:0, w:0};
+    
+    var localGoal = goal.transform(
+            -worldRobot.pose.x,
+            -worldRobot.pose.y,
+            -worldRobot.pose.heading
+            );
+    
+    // start a loop to update & draw the robot's pose
+    //  (this pretends to do what the real world would do to the robot)
     setInterval(function () {
         // move our robot forward in time
-        worldRobot.step(DT);
+        worldRobot.step(SIMULATION_TIME_STEP);
 
+        // move the goal & obstacle points into the local reference frame
+        localGoal = goal.transform(
+            -worldRobot.pose.x,
+            -worldRobot.pose.y,
+            -worldRobot.pose.heading
+            );
+        
+        // draw the trajectories on the local canvas
+        localGraphics.restoreBuffer();
+        localGraphics.drawTrajectories(trajectories);
+
+        // recalculate the current trajectory in the global reference frame,
+        //  and then draw it on the global canvas
+        worldGraphics.restoreBuffer();
+        worldGraphics.drawTrajectories([createTrajectory(
+            decision.v,
+            decision.w,
+            worldRobot.pose
+            )]);
+
+        // finally, draw the current robot on the world canvas
+        worldGraphics.drawRobot(worldRobot);
+        
+        // then draw the goal in the world and local frame
+        worldGraphics.plotPoint(goal.x, goal.y, 1.0);
+        localGraphics.plotPoint(localGoal.x, localGoal.y, 1.0);
+    }, SIMULATION_TIME_STEP*1000);
+    
+    // start a loop to make decisions on how the robot should move
+    //  (this pretends to be the main loop running on the robot's processor) 
+    setInterval(function () {
         // cacluate the available trajectories in the local reference frame
-        var trajectories = calculateDWTrajectories(
+        trajectories = calculateDWTrajectories(
             worldRobot.pose,
             localRobot.pose
             );
 
         // move the goal & obstacle points into the local reference frame
-        var localGoal = goal.transform(
+        localGoal = goal.transform(
             -worldRobot.pose.x,
             -worldRobot.pose.y,
             -worldRobot.pose.heading
@@ -85,12 +128,12 @@
         
         // make a decision based on current pose, goal, available trajectories,
         //  and detected obstacle points
-        var decision = calcDWDecision(
+        decision = calcDWDecision(
             localRobot.pose, 
             localGoal, 
             trajectories, 
             [],
-            DT*10
+            DECISION_LOOKAHEAD
             );
             
         // set the new pose to reflect the decision
@@ -106,31 +149,7 @@
                 V_INC/3 // kinda arbitrary
                 );
         }
-
-        // draw the trajectories on the local canvas
-        localGraphics.restoreBuffer();
-        localGraphics.drawTrajectories(trajectories);
-
-        // recalculate the current trajectory in the global reference frame,
-        //  and then draw it on the global canvas
-        worldGraphics.restoreBuffer();
-        for (var i = 0; i < trajectories.length; i++) {
-            if (trajectories[i].isCurrent) {
-                worldGraphics.drawTrajectories([createTrajectory(
-                    trajectories[i].v,
-                    trajectories[i].w,
-                    worldRobot.pose
-                    )]);
-            }
-        }
-
-        // finally, draw the current robot on the world canvas
-        worldGraphics.drawRobot(worldRobot);
-        
-        // then draw the goal in the world and local frame
-        worldGraphics.plotPoint(goal.x, goal.y, 1.0);
-        localGraphics.plotPoint(localGoal.x, localGoal.y, 1.0);
-    }, 1000*DT);
+    }, DECISION_TIME_STEP*1000);
 
     // handle keyboard input that controls the angular and linear velocity of 
     //  the robot, while respecting angular and linear velocity bounds
