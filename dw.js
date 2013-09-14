@@ -89,10 +89,43 @@ var calcDWDecision = function (pose, goal, trajectories, obstacles, dt) {
 
         calcSpeedValue = function (traj) {
             // transform [-V_MAX, V_MAX] range to [0, 1] range
-            return traj.v / (2.0 * V_MAX) + 0.5;
+            if (traj.v <= 0) return 0;
+            return traj.v / V_MAX;
         },
 
         calcClearanceValue = function (traj) {
+            if (traj.type === "point") {
+                return 1.0;
+            }
+            
+            if (traj.type === "line") {
+                var minValue = MAX_CLEARANCE_VALUE;
+            
+                for (var i = 0; i < obstacles.length; i++) {
+                    if (obstacles[i].y > ROBOT_RADIUS || 
+                        obstacles[i].y < -ROBOT_RADIUS ||
+                        obstacles[i].x < ROBOT_RADIUS) 
+                    {
+                        continue;
+                    }
+                    
+                    if (obstacles[i].x - ROBOT_RADIUS < minValue) {
+                        minValue = obstacles[i].x - ROBOT_RADIUS;
+                    }
+                }
+                
+                return minValue/MAX_CLEARANCE_VALUE;
+            } else if (traj.type === "arc") {
+                var minValue = MAX_CLEARANCE_VALUE;
+            
+                for (var i = 0; i < obstacles.length; i++) {
+                    
+                }
+                
+                return minValue/MAX_CLEARANCE_VALUE;
+            }
+        
+        
             return 0.0;
         };
 
@@ -107,6 +140,8 @@ var calcDWDecision = function (pose, goal, trajectories, obstacles, dt) {
                 calcSpeedValue(traj) * SPEED_WEIGHT + 
                 calcClearanceValue(traj) * CLEARANCE_WEIGHT;
 
+        console.log(value, traj.v, traj.w);
+                
         if (value > maxValue) {
             maxValue = value;
             decision.v = traj.v;

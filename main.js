@@ -53,7 +53,10 @@
             V_MAX
             )),
             
-        goal = createPoint({x:25.0, y:1.0});
+        goal = createPoint({x:25.0, y:0.0}),
+        obstacles = [
+            createPoint({x:20.0, y:0.0})
+        ];
 
     // set all the canvas' backgrounds
     worldGraphics.drawGrid(10, 10);
@@ -134,7 +137,7 @@
             localRobot.pose, 
             localGoal, 
             trajectories, 
-            [],
+            obstacles,
             DECISION_LOOKAHEAD
             );
             
