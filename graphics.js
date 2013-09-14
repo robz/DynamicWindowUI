@@ -78,6 +78,37 @@ var createGraphics = function (plot) {
         plot.restore();
     }
     
+    that.drawGrid = function (xinc, yinc) {
+        var sizex = plot.sizex,
+            sizey = plot.sizey;
+
+        plot.beginPath();
+    
+        var x, y;
+    
+        for (x = 0; x <= sizex; x += xinc) {
+            plot.moveTo(x, -sizey);
+            plot.lineTo(x, sizey);
+        }
+    
+        for (x = 0; x >= -sizex; x -= xinc) {
+            plot.moveTo(x, -sizey);
+            plot.lineTo(x, sizey);
+        }
+    
+        for (y = 0; y <= sizey; y += yinc) {
+            plot.moveTo(-sizex, y);
+            plot.lineTo(sizex, y);
+        }
+    
+        for (y = 0; y >= -sizey; y -= yinc) {
+            plot.moveTo(-sizex, y);
+            plot.lineTo(sizex, y);
+        }
+    
+        plot.stroke();
+    }
+    
     that.drawAxis = function (xinc, yinc, xTickHeight, yTickHeight) {
         var sizex = plot.sizex,
             sizey = plot.sizey;

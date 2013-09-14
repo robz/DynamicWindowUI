@@ -11,7 +11,7 @@
             heading: 0.0,
             v: 0.0,
             w: 0.0,
-            radius: 5.0,
+            radius: ROBOT_RADIUS,
             color: "green",
             name: "world"
             }),
@@ -56,7 +56,9 @@
         goal = createPoint({x:25.0, y:1.0});
 
     // set all the canvas' backgrounds
+    worldGraphics.drawGrid(10, 10);
     worldGraphics.setBuffer();
+    localGraphics.drawGrid(10, 10);
     localGraphics.drawRobot(localRobot);
     localGraphics.setBuffer();
     dwGraphics.drawAxis(W_INC, V_INC, W_INC/2.0, V_INC/2.0);
