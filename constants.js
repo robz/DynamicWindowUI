@@ -2,6 +2,8 @@ var SIMULATION_TIME_STEP = 10/1000, // seconds
     DECISION_TIME_STEP = 100/1000, // seconds
     DECISION_LOOKAHEAD = 10*DECISION_TIME_STEP,
 
+    ROBOT_RADIUS = 5,
+    
     V_MAX = 10,
     V_NUM_INCS = 5,
     DV_MAX = 10,
@@ -11,6 +13,8 @@ var SIMULATION_TIME_STEP = 10/1000, // seconds
     W_NUM_INCS = 5,
     DW_MAX = Math.PI,
     W_INC = 2*DW_MAX*DECISION_TIME_STEP/W_NUM_INCS,
+    
+    MAX_CLEARANCE_VALUE = 
     
     HEADING_WEIGHT = 1.0,
     SPEED_WEIGHT = 1.0,
