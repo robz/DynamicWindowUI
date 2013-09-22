@@ -82,6 +82,7 @@ var createGraphics = function (plot) {
         var sizex = plot.sizex,
             sizey = plot.sizey;
 
+        plot.strokeStyle = "darkGray";
         plot.beginPath();
     
         var x, y;

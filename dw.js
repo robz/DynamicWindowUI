@@ -88,9 +88,8 @@ var calcDWDecision = function (pose, goal, trajectories, obstacles, dt) {
         },
 
         calcSpeedValue = function (traj) {
-            // transform [-V_MAX, V_MAX] range to [0, 1] range
-            if (traj.v <= 0) return 0;
-            return traj.v / V_MAX;
+            // map [-V_MAX, V_MAX] range to [0, 1] range
+            return (traj.v + V_MAX) / (2*V_MAX);
         },
 
         calcClearanceValue = function (traj) {

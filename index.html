@@ -41,17 +41,20 @@ body {
 </style>
 </head>
 <body>
-    <h3>Visual representation of dynamic window technqiue</h3>
-    
+    <h3>Visual representation of dynamic window technique</h3>
+	<i>Click left pane to set a destination</i><br/><br/>
     <div id="container">
-    <div id="center" class="column">angular (x) vs linear (y) plot of current window<br/>
+    <div id="center" class="column">
     <canvas width=400 height=400 id="plotCanvas"></canvas>
+	<br/>angular (x) vs linear (y) plot of current window
     </div>
-    <div id="left" class="column">global frame with current trajectory<br/>
+    <div id="left" class="column">
     <canvas width=400 height=400 id="worldCanvas">your user agent (probably a browser) does not support html5 canvas!</canvas>
-    </div>
-    <div id="right" class="column">local frame with all possible trajectories in window<br/>
+    <br/>global frame with current trajectory
+	</div>
+    <div id="right" class="column">
     <canvas width=400 height=400 id="localCanvas"></canvas>
+	<br/>local frame with all possible trajectories in window
     </div>
     </div>
 
