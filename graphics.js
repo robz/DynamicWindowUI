@@ -15,6 +15,16 @@ var createGraphics = function (plot) {
     
     that.graphToCanvasCoords = plot.graphToCanvasCoords;
     that.canvasToGraphCoords = plot.canvasToGraphCoords;
+	
+	that.drawObstacles = function (obstacles, r) {
+        plot.save();
+		
+		for (var i = 0; i < obstacles.length; i++) {
+			that.plotPoint(obstacles[i].x, obstacles[i].y, 1.0, "darkBlue");
+		}
+		
+		plot.restore();
+	};
     
     that.drawRobot = function (robot) {
         plot.save();
@@ -81,6 +91,8 @@ var createGraphics = function (plot) {
     that.drawGrid = function (xinc, yinc) {
         var sizex = plot.sizex,
             sizey = plot.sizey;
+			
+        plot.save();
 
         plot.strokeStyle = "darkGray";
         plot.beginPath();
@@ -108,11 +120,15 @@ var createGraphics = function (plot) {
         }
     
         plot.stroke();
+		
+		plot.restore();
     }
     
     that.drawAxis = function (xinc, yinc, xTickHeight, yTickHeight) {
         var sizex = plot.sizex,
             sizey = plot.sizey;
+			
+        plot.save();
         
         plot.beginPath();
         
@@ -144,12 +160,18 @@ var createGraphics = function (plot) {
         }
     
         plot.stroke();
+		
+		plot.restore();
     };
     
-    that.plotPoint = function (x, y, r) {
-        plot.fillStyle = "black";
+    that.plotPoint = function (x, y, r, color) {
+        plot.save();
+		
+        plot.fillStyle = color || "black";
         drawCircle(x, y, r);
         plot.fill();
+		
+		plot.restore();
     };
     
     var buffer;

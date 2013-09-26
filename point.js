@@ -14,6 +14,10 @@ var createPoint = function (spec) {
         p.y = (that.x + dx) * Math.sin(dtheta) + (that.y + dy) * Math.cos(dtheta);
         return p;
     };
+	
+	that.euclid = function (p) {
+		return Math.sqrt((p.x - that.x)*(p.x - that.x) + (p.y - that.y)*(p.y - that.y));
+	}
     
     return that;
 };

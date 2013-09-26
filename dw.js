@@ -10,10 +10,10 @@ var createTrajectory = function (v, w, refPose) {
         isCurrent: false
         };
 
-    if (Math.abs(w) < 1.0e-6 && Math.abs(v) < 1.0e-6) {
+    if (Math.abs(v) < 1.0e-6) {
         that.type = "point";
         that.v = 0;
-        that.w = 0;
+        that.w = w;
         that.x = refPose.x; 
         that.y = refPose.y;
     } else if (Math.abs(w) < 1.0e-6) {
@@ -42,19 +42,19 @@ var calculateDWTrajectories = function (pose, refPose) {
 
     for (vi = 0; vi < V_NUM_INCS; vi++) {
         var v = pose.v + (vi - Math.floor(V_NUM_INCS/2))*V_INC;
-        
-        if (v > V_MAX || v < -V_MAX) {
+		
+        if (v > V_MAX + 1e-6 || v < V_MIN - 1e-6) {
             continue;
         }
         
         for (wi = 0; wi < W_NUM_INCS; wi++) {
-            var w = pose.w + (wi - Math.floor(W_NUM_INCS/2))*W_INC;
+			var w = pose.w + (wi - Math.floor(W_NUM_INCS/2))*W_INC;
         
-            if (w > W_MAX || w < -W_MAX) {
+            if (w > W_MAX || w < W_MIN) {
                 continue;
             }
             
-            var trajectory = createTrajectory(v, w, refPose);
+			var trajectory = createTrajectory(v, w, refPose);
 
             if (wi === Math.floor(W_NUM_INCS/2) && vi === Math.floor(V_NUM_INCS/2)) {
                 trajectory.isCurrent = true;
@@ -101,26 +101,65 @@ var calcDWDecision = function (pose, goal, trajectories, obstacles, dt) {
                 var minValue = MAX_CLEARANCE_VALUE;
             
                 for (var i = 0; i < obstacles.length; i++) {
-                    if (obstacles[i].y > ROBOT_RADIUS || 
-                        obstacles[i].y < -ROBOT_RADIUS ||
-                        obstacles[i].x < ROBOT_RADIUS) 
+					if (obstacles[i].euclid(traj) < DECISION_RADIUS) {
+						continue;
+					}
+				
+                    if (obstacles[i].y > DECISION_RADIUS || 
+                        obstacles[i].y < -DECISION_RADIUS) 
                     {
                         continue;
                     }
                     
-                    if (obstacles[i].x - ROBOT_RADIUS < minValue) {
-                        minValue = obstacles[i].x - ROBOT_RADIUS;
-                    }
+					if ((obstacles[i].x < DECISION_RADIUS && traj.v > 0) || 
+						(obstacles[i].x > -DECISION_RADIUS && traj.v < 0))
+					{
+						continue;
+					}
+					
+					if (traj.v > 0) {
+						var value = obstacles[i].x - DECISION_RADIUS;
+					} else {
+						var value = -obstacles[i].x - DECISION_RADIUS;
+					}
+					
+					if (value < minValue) {
+						minValue = value;
+					}
                 }
                 
                 return minValue/MAX_CLEARANCE_VALUE;
             } else if (traj.type === "arc") {
                 var minValue = MAX_CLEARANCE_VALUE;
-            
+				
+				if (traj.w < 0) {
+					var cpoint = createPoint({x:0, y:-traj.radius});
+				} else {
+					var cpoint = createPoint({x:0, y:traj.radius});
+				}
                 for (var i = 0; i < obstacles.length; i++) {
-                    
+                    var r = cpoint.euclid(obstacles[i]);
+					
+					if (r + DECISION_RADIUS < traj.radius || r - DECISION_RADIUS > traj.radius) {
+						continue;
+					}
+					
+					var angle = (2*Math.PI + Math.atan2(obstacles[i].y - cpoint.y, obstacles[i].x - cpoint.x))%(Math.PI*2);
+					if (traj.w > 0) {
+						angle = (angle + Math.PI/2)%(Math.PI*2);
+					} else {
+						angle = (Math.PI*2 - angle + Math.PI/2)%(Math.PI*2);
+					}
+
+					var distance = angle*traj.radius;
+					
+					distance = (distance - traj.radius < 0) ? 0 : distance - traj.radius;
+					
+					if (distance < minValue) {
+						minValue = distance;
+					}
                 }
-                
+				
                 return minValue/MAX_CLEARANCE_VALUE;
             }
         
@@ -138,8 +177,6 @@ var calcDWDecision = function (pose, goal, trajectories, obstacles, dt) {
         value = calcHeadingValue(traj) * HEADING_WEIGHT +
                 calcSpeedValue(traj) * SPEED_WEIGHT + 
                 calcClearanceValue(traj) * CLEARANCE_WEIGHT;
-
-        console.log(value, traj.v, traj.w);
                 
         if (value > maxValue) {
             maxValue = value;

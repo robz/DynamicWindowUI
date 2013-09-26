@@ -53,10 +53,17 @@
             V_MAX
             )),
             
-        goal = createPoint({x:25.0, y:0.0}),
-        obstacles = [
-            createPoint({x:20.0, y:0.0})
-        ];
+        goal = createPoint({x:35.0, y:0.0}),
+        obstacles = [];
+	
+	
+	for (var i = 0; i < 50; i++) {
+		obstacles.push(createPoint({
+			x: Math.random()*100-50,
+			y: Math.random()*100-50
+			}));
+	}
+	
 
     // set all the canvas' backgrounds
     worldGraphics.drawGrid(10, 10);
@@ -76,6 +83,62 @@
             -worldRobot.pose.y,
             -worldRobot.pose.heading
             );
+			
+	
+    // start a loop to make decisions on how the robot should move
+    //  (this pretends to be the main loop running on the robot's processor) 
+    setInterval(function () {
+        // calculate the available trajectories in the local reference frame
+        trajectories = calculateDWTrajectories(
+            worldRobot.pose,
+            localRobot.pose
+            );
+
+        // move the goal & obstacle points into the local reference frame
+        localGoal = goal.transform(
+            -worldRobot.pose.x,
+            -worldRobot.pose.y,
+            -worldRobot.pose.heading
+            );
+			
+		var localObstacles = [];
+		for (var i = 0; i < obstacles.length; i++) {
+			localObstacles.push(obstacles[i].transform(
+				-worldRobot.pose.x,
+				-worldRobot.pose.y,
+				-worldRobot.pose.heading
+				));
+		}
+
+        // copy the current angular and linear velocity to our local pose
+        localRobot.pose.v = worldRobot.pose.v;
+        localRobot.pose.w = worldRobot.pose.w;
+        
+        // make a decision based on current pose, goal, available trajectories,
+        //  and detected obstacle points
+        decision = calcDWDecision(
+            localRobot.pose, 
+            localGoal, 
+            trajectories, 
+            localObstacles,
+            DECISION_LOOKAHEAD
+            );
+            
+        // set the new pose to reflect the decision
+        worldRobot.pose.v = decision.v;
+        worldRobot.pose.w = decision.w;
+        
+        // plot the trajectory (w,v) pairs as points on the graph
+        dwGraphics.restoreBuffer();
+		
+        for (var i = 0; i < trajectories.length; i++) {
+            dwGraphics.plotPoint(
+                trajectories[i].w,
+                trajectories[i].v,
+                V_INC/3 // kinda arbitrary
+                );
+        }
+    }, DECISION_TIME_STEP*1000);
     
     // start a loop to update & draw the robot's pose
     //  (this pretends to do what the real world would do to the robot)
@@ -89,6 +152,15 @@
             -worldRobot.pose.y,
             -worldRobot.pose.heading
             );
+		
+		var localObstacles = [];
+		for (var i = 0; i < obstacles.length; i++) {
+			localObstacles.push(obstacles[i].transform(
+				-worldRobot.pose.x,
+				-worldRobot.pose.y,
+				-worldRobot.pose.heading
+				));
+		}
         
         // draw the trajectories on the local canvas
         localGraphics.restoreBuffer();
@@ -106,55 +178,15 @@
         // finally, draw the current robot on the world canvas
         worldGraphics.drawRobot(worldRobot);
         
-        // then draw the goal in the world and local frame
+        // draw the goal & obstacles in the world frame
         worldGraphics.plotPoint(goal.x, goal.y, 1.0);
+		worldGraphics.drawObstacles(obstacles, worldRobot.radius);
+		
+		// then draw them in the local frame
         localGraphics.plotPoint(localGoal.x, localGoal.y, 1.0);
+		localGraphics.drawObstacles(localObstacles, worldRobot.radius);
     }, SIMULATION_TIME_STEP*1000);
     
-    // start a loop to make decisions on how the robot should move
-    //  (this pretends to be the main loop running on the robot's processor) 
-    setInterval(function () {
-        // cacluate the available trajectories in the local reference frame
-        trajectories = calculateDWTrajectories(
-            worldRobot.pose,
-            localRobot.pose
-            );
-
-        // move the goal & obstacle points into the local reference frame
-        localGoal = goal.transform(
-            -worldRobot.pose.x,
-            -worldRobot.pose.y,
-            -worldRobot.pose.heading
-            );
-
-        // copy the current angular and linear velocity to our local pose
-        localRobot.pose.v = worldRobot.pose.v;
-        localRobot.pose.w = worldRobot.pose.w;
-        
-        // make a decision based on current pose, goal, available trajectories,
-        //  and detected obstacle points
-        decision = calcDWDecision(
-            localRobot.pose, 
-            localGoal, 
-            trajectories, 
-            obstacles,
-            DECISION_LOOKAHEAD
-            );
-            
-        // set the new pose to reflect the decision
-        worldRobot.pose.v = decision.v;
-        worldRobot.pose.w = decision.w;
-        
-        // plot the trajectory (w,v) pairs as points on the graph
-        dwGraphics.restoreBuffer();
-        for (var i = 0; i < trajectories.length; i++) {
-            dwGraphics.plotPoint(
-                trajectories[i].w,
-                trajectories[i].v,
-                V_INC/3 // kinda arbitrary
-                );
-        }
-    }, DECISION_TIME_STEP*1000);
 
     // handle keyboard input that controls the angular and linear velocity of 
     //  the robot, while respecting angular and linear velocity bounds
