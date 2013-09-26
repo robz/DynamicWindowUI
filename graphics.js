@@ -164,6 +164,17 @@ var createGraphics = function (plot) {
 		plot.restore();
     };
     
+	that.plotLine = function (x1, y1, x2, y2, w, color) {
+        plot.save();
+		
+		plot.lineWidth = w || 1;
+        plot.strokeStyle = color || "black";
+        drawLine(x1, y1, x2, y2);
+        plot.stroke();
+		
+		plot.restore();
+    };
+	
     that.plotPoint = function (x, y, r, color) {
         plot.save();
 		
