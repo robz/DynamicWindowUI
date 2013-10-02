@@ -48,8 +48,28 @@ var createGraphics = function (plot) {
         
         plot.restore();
     };
-    
+	
     that.drawTrajectories = function (trajs) {
+		PointTrajectory.prototype.draw = function () {
+			drawCircle(this.x, this.y, 1);
+			plot.fill();
+		};
+
+		LineTrajectory.prototype.draw = function () {
+			drawLine(
+				this.x, 
+				this.y,
+				this.x + 1e6*Math.cos(this.theta), 
+				this.y + 1e6*Math.sin(this.theta)
+				);
+			plot.stroke();
+		};
+
+		ArcTrajectory.prototype.draw = function () {
+			drawCircle(this.x, this.y, this.radius);
+			plot.stroke();
+		};
+	
         plot.save();
         
         for (var i = 0; i < trajs.length; i++) {
@@ -63,26 +83,8 @@ var createGraphics = function (plot) {
                 plot.strokeStyle = plot.fillStyle = "black";
                 plot.lineWidth = 1;
             }
-            
-            switch (trajs[i].type) {
-                case "line":
-                    drawLine(
-                        trajs[i].x, 
-                        trajs[i].y,
-                        trajs[i].x + 1e6*Math.cos(trajs[i].theta), 
-                        trajs[i].y + 1e6*Math.sin(trajs[i].theta)
-                        );
-                    plot.stroke();
-                    break;
-                case "arc":
-                    drawCircle(trajs[i].x, trajs[i].y, trajs[i].radius);
-                    plot.stroke();
-                    break;
-                case "point":
-                    drawCircle(trajs[i].x, trajs[i].y, 1);
-                    plot.fill();
-                    break;
-            }
+			
+			trajs[i].draw();
         }
         
         plot.restore();

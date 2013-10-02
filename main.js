@@ -5,7 +5,7 @@
         KEY_D = "D".charCodeAt(0),
         KEY_SPACE = " ".charCodeAt(0),
 
-        worldRobot = createRobot({
+        worldRobot = new Robot({
             x: 0.0,
             y: 0.0,
             heading: 0.0,
@@ -16,7 +16,7 @@
             name: "world"
             }),
 
-        localRobot = createRobot({
+        localRobot = new Robot({
             x: 0.0,
             y: 0.0,
             heading: 0.0,

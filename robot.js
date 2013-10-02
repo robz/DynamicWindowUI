@@ -1,55 +1,55 @@
-var createPose = function (spec) {
-    var pose = {
-        x: spec.x,
-        y: spec.y,
-        heading: spec.heading,
-        v: spec.v,
-        w: spec.w
-        };
-    
-    pose.step = function (dt) {
-        var new_x, new_y, new_heading;
+//
+// Pose
+//
 
-        if (Math.abs(pose.w) < 1.0e-6) {
-            new_x = pose.x + dt * pose.v * Math.cos(pose.heading);
-            new_y = pose.y + dt * pose.v * Math.sin(pose.heading);
-            new_heading = pose.heading;
-        } else {
-            var wd = dt * pose.w,
-                R = pose.v / pose.w;
-
-            new_x = pose.x + R * Math.sin(wd + pose.heading) 
-                           - R * Math.sin(pose.heading);
-            new_y = pose.y - R * Math.cos(wd + pose.heading) 
-                           + R * Math.cos(pose.heading);   
-            new_heading = pose.heading + wd;
-            new_heading = (new_heading + Math.PI*2)%(Math.PI*2)
-        }
-
-        pose.x = new_x;
-        pose.y = new_y;
-        pose.heading = new_heading;
-    };
+var Pose = function (spec) {
+    this.x = spec.x;
+    this.y = spec.y;
+    this.heading = spec.heading;
+    this.v = spec.v;
+    this.w = spec.w;
+};
     
-    pose.copy = function () {
-        var newPose = createPose(pose);
-        return createPose(pose);
-    };
+Pose.prototype.step = function (dt) {
+	var new_x, new_y, new_heading;
+
+	if (Math.abs(this.w) < 1.0e-6) {
+		new_x = this.x + dt * this.v * Math.cos(this.heading);
+		new_y = this.y + dt * this.v * Math.sin(this.heading);
+		new_heading = this.heading;
+	} else {
+		var wd = dt * this.w,
+			R = this.v / this.w;
+
+		new_x = this.x + R * Math.sin(wd + this.heading) 
+					   - R * Math.sin(this.heading);
+		new_y = this.y - R * Math.cos(wd + this.heading) 
+					   + R * Math.cos(this.heading);   
+		new_heading = this.heading + wd;
+		new_heading = (new_heading + Math.PI*2)%(Math.PI*2)
+	}
+
+	this.x = new_x;
+	this.y = new_y;
+	this.heading = new_heading;
+};
     
-    return pose;
+Pose.prototype.copy = function () {
+    return new Pose(this);
 };
 
-var createRobot = function (spec) {
-    var that = {
-        radius: spec.radius,
-        color: spec.color,
-        name: spec.name,
-        pose: createPose(spec)
-        };
-    
-    that.step = function (dt) {
-        that.pose.step(dt);
-    };
 
-    return that;
+//
+// Robot
+//
+
+var Robot = function (spec) {
+    this.radius = spec.radius;
+    this.color = spec.color;
+    this.name = spec.name;
+    this.pose = new Pose(spec);
+};
+
+Robot.prototype.step = function (dt) {
+	this.pose.step(dt);
 };
