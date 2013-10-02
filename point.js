@@ -1,23 +1,19 @@
-var createPoint = function (spec) {
-    var that = {
-        x: spec.x,
-        y: spec.y
-        };
-    
-    that.copy = function () {
-        return createPoint(that);
-    };
-    
-    that.transform = function (dx, dy, dtheta) {
-        var p = that.copy();
-        p.x = (that.x + dx) * Math.cos(dtheta) - (that.y + dy) * Math.sin(dtheta);
-        p.y = (that.x + dx) * Math.sin(dtheta) + (that.y + dy) * Math.cos(dtheta);
-        return p;
-    };
-	
-	that.euclid = function (p) {
-		return Math.sqrt((p.x - that.x)*(p.x - that.x) + (p.y - that.y)*(p.y - that.y));
-	}
-    
-    return that;
+var Point = function (spec) {
+	this.x = spec.x;
+	this.y = spec.y;
+};
+
+Point.prototype.copy = function () {
+	return new Point(this);
+};
+
+Point.prototype.transform = function (dx, dy, dtheta) {
+	var p = this.copy();
+	p.x = (this.x + dx) * Math.cos(dtheta) - (this.y + dy) * Math.sin(dtheta);
+	p.y = (this.x + dx) * Math.sin(dtheta) + (this.y + dy) * Math.cos(dtheta);
+	return p;
+};
+
+Point.prototype.euclid = function (p) {
+	return Math.sqrt((p.x - this.x)*(p.x - this.x) + (p.y - this.y)*(p.y - this.y));
 };

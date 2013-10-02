@@ -53,12 +53,12 @@
             V_MAX
             )),
             
-        goal = createPoint({x:35.0, y:0.0}),
+        goal = new Point({x:35.0, y:0.0}),
         obstacles = [];
 	
 	
 	for (var i = 0; i < 50; i++) {
-		obstacles.push(createPoint({
+		obstacles.push(new Point({
 			x: Math.random()*100-50,
 			y: Math.random()*100-50
 			}));
@@ -89,7 +89,7 @@
     //  (this pretends to be the main loop running on the robot's processor) 
     setInterval(function () {
         // calculate the available trajectories in the local reference frame
-        trajectories = calculateDWTrajectories(
+        trajectories = DW.calcTrajectories(
             worldRobot.pose,
             localRobot.pose
             );
@@ -116,7 +116,7 @@
         
         // make a decision based on current pose, goal, available trajectories,
         //  and detected obstacle points
-        decision = calcDWDecision(
+        decision = DW.calcDecision(
             localRobot.pose, 
             localGoal, 
             trajectories, 
@@ -169,7 +169,7 @@
         // recalculate the current trajectory in the global reference frame,
         //  and then draw it on the global canvas
         worldGraphics.restoreBuffer();
-        worldGraphics.drawTrajectories([createTrajectory(
+        worldGraphics.drawTrajectories([DW.createTrajectory(
             decision.v,
             decision.w,
             worldRobot.pose
