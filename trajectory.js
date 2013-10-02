@@ -66,34 +66,36 @@ LineTrajectory.prototype = new Trajectory();
 
 LineTrajectory.prototype.calcClearanceValue = function (obstacles) {
 	var minValue = MAX_CLEARANCE_VALUE;
-            
-	for (var i = 0; i < obstacles.length; i++) {
-		if (obstacles[i].euclid(this) < DECISION_RADIUS) {
-			continue;
+	
+	var _this = this;
+    
+	obstacles.forEach(function(obstacle, index, array) {
+		if (obstacle.euclid(_this) < DECISION_RADIUS) {
+			return;
 		}
 	
-		if (obstacles[i].y > DECISION_RADIUS || 
-			obstacles[i].y < -DECISION_RADIUS) 
+		if (obstacle.y > DECISION_RADIUS || 
+			obstacle.y < -DECISION_RADIUS) 
 		{
-			continue;
+			return;
 		}
 		
-		if ((obstacles[i].x < DECISION_RADIUS && this.v > 0) || 
-			(obstacles[i].x > -DECISION_RADIUS && this.v < 0))
+		if ((obstacle.x < DECISION_RADIUS && _this.v > 0) || 
+			(obstacle.x > -DECISION_RADIUS && _this.v < 0))
 		{
-			continue;
+			return;
 		}
 		
-		if (this.v > 0) {
-			var value = obstacles[i].x - DECISION_RADIUS;
+		if (_this.v > 0) {
+			var value = obstacle.x - DECISION_RADIUS;
 		} else {
-			var value = -obstacles[i].x - DECISION_RADIUS;
+			var value = -obstacle.x - DECISION_RADIUS;
 		}
 		
 		if (value < minValue) {
 			minValue = value;
 		}
-	}
+	});
 	
 	return minValue/MAX_CLEARANCE_VALUE;
 };
@@ -123,28 +125,32 @@ ArcTrajectory.prototype.calcClearanceValue = function (obstacles) {
 	} else {
 		var cpoint = new Point({x:0, y:this.radius});
 	}
-	for (var i = 0; i < obstacles.length; i++) {
-		var r = cpoint.euclid(obstacles[i]);
+	
+	var _this = this;
+	
+	obstacles.forEach(function (obstacle, index, array) {
+		var r = cpoint.euclid(obstacle);
 		
-		if (r + DECISION_RADIUS < this.radius || r - DECISION_RADIUS > this.radius) {
-			continue;
+		if (r + DECISION_RADIUS < _this.radius || r - DECISION_RADIUS > _this.radius) {
+			return;
 		}
 		
-		var angle = (2*Math.PI + Math.atan2(obstacles[i].y - cpoint.y, obstacles[i].x - cpoint.x))%(Math.PI*2);
-		if (this.w > 0) {
+		var angle = (2*Math.PI + Math.atan2(obstacle.y - cpoint.y, 
+											obstacle.x - cpoint.x))%(Math.PI*2);
+		if (_this.w > 0) {
 			angle = (angle + Math.PI/2)%(Math.PI*2);
 		} else {
 			angle = (Math.PI*2 - angle + Math.PI/2)%(Math.PI*2);
 		}
 
-		var distance = angle*this.radius;
+		var distance = angle * _this.radius;
 		
-		distance = (distance - this.radius < 0) ? 0 : distance - this.radius;
+		distance = (distance - _this.radius < 0) ? 0 : distance - _this.radius;
 		
 		if (distance < minValue) {
 			minValue = distance;
 		}
-	}
+	});
 	
 	return minValue/MAX_CLEARANCE_VALUE;
 };

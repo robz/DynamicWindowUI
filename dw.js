@@ -30,7 +30,9 @@ var DW = (function () {
 				
 				var trajectory = that.createTrajectory(v, w, refPose);
 
-				if (wi === Math.floor(W_NUM_INCS/2) && vi === Math.floor(V_NUM_INCS/2)) {
+				if (wi === Math.floor(W_NUM_INCS/2) && 
+					vi === Math.floor(V_NUM_INCS/2)) 
+				{
 					trajectory.isCurrent = true;
 				}
 

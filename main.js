@@ -102,13 +102,14 @@
             );
 			
 		var localObstacles = [];
-		for (var i = 0; i < obstacles.length; i++) {
-			localObstacles.push(obstacles[i].transform(
+		
+		obstacles.forEach(function (elem, index, array) {
+			localObstacles.push(elem.transform(
 				-worldRobot.pose.x,
 				-worldRobot.pose.y,
 				-worldRobot.pose.heading
 				));
-		}
+		});
 
         // copy the current angular and linear velocity to our local pose
         localRobot.pose.v = worldRobot.pose.v;
@@ -131,13 +132,13 @@
         // plot the trajectory (w,v) pairs as points on the graph
         dwGraphics.restoreBuffer();
 		
-        for (var i = 0; i < trajectories.length; i++) {
+		trajectories.forEach(function (elem, index, array) {
             dwGraphics.plotPoint(
-                trajectories[i].w,
-                trajectories[i].v,
+                elem.w,
+                elem.v,
                 V_INC/3 // kinda arbitrary
                 );
-        }
+		});
     }, DECISION_TIME_STEP*1000);
     
     // start a loop to update & draw the robot's pose
@@ -154,13 +155,14 @@
             );
 		
 		var localObstacles = [];
-		for (var i = 0; i < obstacles.length; i++) {
-			localObstacles.push(obstacles[i].transform(
+		
+		obstacles.forEach(function (elem, index, array) {
+			localObstacles.push(elem.transform(
 				-worldRobot.pose.x,
 				-worldRobot.pose.y,
 				-worldRobot.pose.heading
 				));
-		}
+		});
         
         // draw the trajectories on the local canvas
         localGraphics.restoreBuffer();
