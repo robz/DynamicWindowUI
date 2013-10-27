@@ -19,9 +19,9 @@ var createGraphics = function (plot) {
 	that.drawObstacles = function (obstacles, r) {
         plot.save();
 		
-		for (var i = 0; i < obstacles.length; i++) {
-			that.plotPoint(obstacles[i].x, obstacles[i].y, 1.0, "darkBlue");
-		}
+		obstacles.forEach(function (obstacle, index, array) {
+			that.plotPoint(obstacle.x, obstacle.y, 1.0, "darkBlue");
+		});
 		
 		plot.restore();
 	};
